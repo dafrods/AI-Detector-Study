@@ -10,19 +10,8 @@ MODELS = [
     "EfficientNet-B4",
 ]
 
-class FullyConnected(torch.nn.Module):
-    def __init__(self, in_features, out_features):
-        super(FullyConnected, self).__init__()
-        self.model = torch.nn.Linear(in_features, out_features)
-
-    def forward(self,x):
-        x = torch.nn.Flatten(x)
-        x = self.model(x)
-        return x
-
-
 class CustomCNN(torch.nn.Module):
-    def __init__(self, in_features, out_features):
+    def __init__(self, in_features=256, out_features=1):
         super(CustomCNN,self).__init__()
         self.model = torch.nn.Linear(in_features=in_features,out_features=out_features)
 
@@ -30,7 +19,11 @@ class CustomCNN(torch.nn.Module):
         pass
 
 class VGG19(torch.nn.Module):
-    def __init__(self, freeze=True ,pretrained=False):
+    def __init__(self,
+                 classifier : torch.nn.Sequential,
+                 freeze=True ,
+                 pretrained=False
+        ):
         super(VGG19,self).__init__()
 
         weights = None
@@ -45,12 +38,19 @@ class VGG19(torch.nn.Module):
             for param in self.model.parameters():
                 param.requires_grad = False
 
+        self.model.classifier = classifier
+
 
     def forward(self,x):
         pass
 
 class DenseNet121(torch.nn.Module):
-    def __init__(self, fcmodel: FullyConnected ,freeze = True, pretrained = False):
+    def __init__(self,
+                 classifier: torch.nn.Linear = torch.nn.Linear(512*4, 1), # 
+                 freeze = True,
+                 pretrained = False
+        ):
+
         super(DenseNet121,self).__init__()
 
         weights = None
@@ -65,13 +65,18 @@ class DenseNet121(torch.nn.Module):
             for param in self.model.parameters():
                 param.requires_grad = False
 
-        self.model.fc = fcmodel
+        self.model.classifier = classifier
     
     def forward(self,x):
         pass
 
 class ResNet50(torch.nn.Module):
-    def __init__(self, fcmodel: FullyConnected, freeze = True, pretrained = False):
+    def __init__(self,
+                 classifier: torch.nn.Linear,
+                 freeze = True,
+                 pretrained = False
+        ):
+        
         super(ResNet50,self).__init__()
 
         weights = None
@@ -86,14 +91,18 @@ class ResNet50(torch.nn.Module):
             for param in self.model.parameters():
                 param.requires_grad = False
         
-        self.model.fc = fcmodel
+        self.model.fc = classifier
 
     
     def forward(self,x):
         pass
     
 class GoogLeNet(torch.nn.Module):
-    def __init__(self, fcmodel: FullyConnected, freeze = True, pretrained = False):
+    def __init__(self, 
+                 classifier: torch.nn.Linear,
+                 freeze = True,
+                 pretrained = False
+        ):
         super(GoogLeNet,self).__init__()
 
         weights = None
@@ -108,14 +117,18 @@ class GoogLeNet(torch.nn.Module):
             for param in self.model.parameters():
                 param.requires_grad = False
         
-        self.model.fc = fcmodel
+        self.model.fc = classifier
 
     
     def forward(self,x):
         pass
 
 class EfficientNetB0(torch.nn.Module):
-    def __init__(self, fcmodel: FullyConnected, freeze = True, pretrained = False):
+    def __init__(self, 
+                 classifier: torch.nn.Linear,
+                 freeze = True, 
+                 pretrained = False
+        ):
         super(EfficientNetB0,self).__init__()
 
         weights = None
@@ -130,7 +143,7 @@ class EfficientNetB0(torch.nn.Module):
             for param in self.model.parameters():
                 param.requires_grad = False
         
-        self.model.fc = fcmodel
+        self.model.fc = classifier
 
     
     def forward(self,x):
