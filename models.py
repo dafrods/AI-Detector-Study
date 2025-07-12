@@ -1,14 +1,24 @@
 import torch
 import torchvision.models as models
 
+from typing import Optional
+
 MODELS = [
     "CustomCNN",
     "VGG19",
     "DenseNet121",
     "ResNet50",
     "GoogLeNet",
-    "EfficientNet-B4",
+    "EfficientNet-B0",
 ]
+
+BINARY_CLASSIFICATION = 1
+
+DENSENET121_FEATURE_SIZE = 512*4
+VGG19_FEATURE_SIZE = 512*7*7
+RESNET50_FEATURE_SIZE = 512 * 4
+GOOGLENET_FEATURE_SIZE = 1024
+EFFICIENTNETB0_CONVOUT_SIZE = 320 * 4
 
 class CustomCNN(torch.nn.Module):
     def __init__(self, in_features=256, out_features=1):
@@ -20,11 +30,23 @@ class CustomCNN(torch.nn.Module):
 
 class VGG19(torch.nn.Module):
     def __init__(self,
-                 classifier : torch.nn.Sequential,
+                 classifier : Optional[torch.nn.Sequential] = None,
+                 dropout : float = .5,
                  freeze=True ,
                  pretrained=False
         ):
         super(VGG19,self).__init__()
+
+        if classifier == None:
+            classifier = torch.nn.Sequential(
+                    torch.nn.Linear(VGG19_FEATURE_SIZE, 4096),
+                    torch.nn.ReLU(True),
+                    torch.nn.Dropout(p=dropout),
+                    torch.nn.Linear(4096, 4096),
+                    torch.nn.ReLU(True),
+                    torch.nn.Dropout(p=dropout),
+                    torch.nn.Linear(4096, BINARY_CLASSIFICATION),
+            )
 
         weights = None
 
@@ -41,17 +63,17 @@ class VGG19(torch.nn.Module):
         self.model.classifier = classifier
 
 
-    def forward(self,x):
-        pass
-
 class DenseNet121(torch.nn.Module):
     def __init__(self,
-                 classifier: torch.nn.Linear = torch.nn.Linear(512*4, 1), # 
+                 classifier: Optional[torch.nn.Linear] = None,
                  freeze = True,
                  pretrained = False
         ):
 
         super(DenseNet121,self).__init__()
+
+        if classifier == None:
+            classifier = torch.nn.Linear(DENSENET121_FEATURE_SIZE, BINARY_CLASSIFICATION)
 
         weights = None
 
@@ -67,17 +89,18 @@ class DenseNet121(torch.nn.Module):
 
         self.model.classifier = classifier
     
-    def forward(self,x):
-        pass
 
 class ResNet50(torch.nn.Module):
     def __init__(self,
-                 classifier: torch.nn.Linear,
+                 classifier: Optional[torch.nn.Linear] = None,
                  freeze = True,
                  pretrained = False
         ):
         
         super(ResNet50,self).__init__()
+
+        if classifier == None:
+            classifier = torch.nn.Linear(RESNET50_FEATURE_SIZE, BINARY_CLASSIFICATION)
 
         weights = None
 
@@ -94,16 +117,16 @@ class ResNet50(torch.nn.Module):
         self.model.fc = classifier
 
     
-    def forward(self,x):
-        pass
-    
 class GoogLeNet(torch.nn.Module):
     def __init__(self, 
-                 classifier: torch.nn.Linear,
+                 classifier: Optional[torch.nn.Linear] = None,
                  freeze = True,
                  pretrained = False
         ):
         super(GoogLeNet,self).__init__()
+
+        if classifier == None:
+            classifier = torch.nn.Linear(GOOGLENET_FEATURE_SIZE, BINARY_CLASSIFICATION)
 
         weights = None
 
@@ -119,17 +142,21 @@ class GoogLeNet(torch.nn.Module):
         
         self.model.fc = classifier
 
-    
-    def forward(self,x):
-        pass
 
 class EfficientNetB0(torch.nn.Module):
     def __init__(self, 
                  classifier: torch.nn.Linear,
+                 dropout = 0.5,
                  freeze = True, 
                  pretrained = False
         ):
         super(EfficientNetB0,self).__init__()
+
+        if classifier == None:
+            classifier = torch.nn.Sequential(
+                         torch.nn.Dropout(p=dropout, inplace=True),
+                         torch.nn.Linear(EFFICIENTNETB0_CONVOUT_SIZE, BINARY_CLASSIFICATION),
+            )
 
         weights = None
 
@@ -144,7 +171,3 @@ class EfficientNetB0(torch.nn.Module):
                 param.requires_grad = False
         
         self.model.fc = classifier
-
-    
-    def forward(self,x):
-        pass
