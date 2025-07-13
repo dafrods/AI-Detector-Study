@@ -1,11 +1,11 @@
-from PIL import Image
-from matplotlib import pyplot as plt
-
 import os
 
 # Set the cache path for torchvision
 os.environ['TORCH_HOME'] = r'models/pretrained/'
 
+
+from PIL import Image
+from matplotlib import pyplot as plt
 
 from models import *
 from torchvision import transforms

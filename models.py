@@ -31,7 +31,7 @@ class CustomCNN(torch.nn.Module):
 class VGG19(torch.nn.Module):
     def __init__(self,
                  classifier : Optional[torch.nn.Linear] = None,
-                 dropout : float = .5,
+                 dropout : float = .5, # No longer in use
                  freeze=True ,
                  pretrained=False
         ):
@@ -61,7 +61,7 @@ class VGG19(torch.nn.Module):
             for param in self.model.parameters():
                 param.requires_grad = False
 
-        self.model.classifier[-1] = classifier
+        self.model.classifier[-1] = classifier # Change last layer instead
 
     def forward(self, x):
         x = self.model(x)
@@ -121,7 +121,7 @@ class ResNet50(torch.nn.Module):
     
     def forward(self, x):
         x = self.model(x)
-        # x = torch.nn.Flatten(x,1)
+        # x = torch.nn.Flatten(x,1) # nn.Module calls the original models forward(x) and this is detrimental
         # x = self.model.fc(x)
         return x
 
