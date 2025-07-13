@@ -5,13 +5,15 @@ A training framework for classification tasks.
 
 
 from numpy import sum
-from torch import argmax, device
+from torch import sigmoid, device
 from torch.nn import Module
 from torch.nn.functional import softmax
 from torch.nn.modules.loss import _Loss
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
+
+from typing import Optional
 
 class ClassificationModelTrainer:
 
@@ -76,9 +78,40 @@ class ClassificationModelTrainer:
                 x_test, y_test = x_test.to(self._device), y_test.to(self._device)
                 self._model.eval()
                 z = softmax(self._model(x_test), dim=1)
-                y_hat = argmax(z.data, dim=1)
+                y_hat = z.data
                 correct += (y_hat == y_test).sum().item()
                 n_test += y_hat.shape[0]
 
             accuracy = correct / n_test
             self.validation_acc.append(accuracy)
+
+
+
+class ImageDataset(Dataset):
+
+    KINDS = ['Validation', 'Train', 'Test']
+
+    def __init__(self, path:Optional[str] = None, limit:Optional[int] = None, kind = ""):
+        
+        # Start Parameter Processing
+        if path == None:
+            dataset_root = r'./Dataset'
+        
+        if kind == None:
+            kind = "Training"
+        
+        if kind in ImageDataset.KINDS:
+            self.kind = kind
+        else:
+            raise ValueError("Kind must be one of the following: 'Validation', 'Train' (DEFAULT), 'Test' ")
+        # End Parameter Processing
+
+
+
+
+
+    def __len__(self):
+        pass
+
+    def __getitem__(self, idx):
+        pass

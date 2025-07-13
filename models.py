@@ -3,18 +3,18 @@ import torchvision.models as models
 
 from typing import Optional
 
-MODELS = [
+__all__ = [
     "CustomCNN",
     "VGG19",
     "DenseNet121",
     "ResNet50",
     "GoogLeNet",
-    "EfficientNet-B0",
+    "EfficientNetB0",
 ]
 
 BINARY_CLASSIFICATION = 1
 
-DENSENET121_FEATURE_SIZE = 512*4
+DENSENET121_FEATURE_SIZE = 512*2
 VGG19_FEATURE_SIZE = 512*7*7
 RESNET50_FEATURE_SIZE = 512 * 4
 GOOGLENET_FEATURE_SIZE = 1024
@@ -50,17 +50,22 @@ class VGG19(torch.nn.Module):
 
         weights = None
 
-        if pretrained:
-            weights = models.VGG19_Weights.DEFAULT
+        
+        weights = models.VGG19_Weights.DEFAULT if pretrained else None
 
         self.model = models.vgg19(weights=weights)
 
         # Freeze Layers
-        if not freeze:
+        if freeze:
             for param in self.model.parameters():
                 param.requires_grad = False
 
         self.model.classifier = classifier
+
+    def forward(self, x):
+        x = self.model(x)
+        return x
+
 
 
 class DenseNet121(torch.nn.Module):
@@ -77,18 +82,21 @@ class DenseNet121(torch.nn.Module):
 
         weights = None
 
-        if pretrained:
-            weights = models.VGG16_Weights.DEFAULT
+        
+        weights = models.VGG16_Weights.DEFAULT if pretrained else None
 
         self.model = models.densenet121(weights=weights)
 
         # Freeze Layers
-        if not freeze:
+        if freeze:
             for param in self.model.parameters():
                 param.requires_grad = False
 
         self.model.classifier = classifier
-    
+
+    def forward(self, x):
+        x = self.model(x)
+        return x
 
 class ResNet50(torch.nn.Module):
     def __init__(self,
@@ -104,17 +112,23 @@ class ResNet50(torch.nn.Module):
 
         weights = None
 
-        if pretrained:
-            weights = models.ResNet50_Weights.DEFAULT
+        
+        weights = models.ResNet50_Weights.DEFAULT if pretrained else None
         
         self.model = models.resnet50(weights=weights)
 
         # Freeze Layers
-        if not freeze:
+        if freeze:
             for param in self.model.parameters():
                 param.requires_grad = False
         
         self.model.fc = classifier
+    
+    def forward(self, x):
+        x = self.model(x)
+        # x = torch.nn.Flatten(x,1)
+        # x = self.model.fc(x)
+        return x
 
     
 class GoogLeNet(torch.nn.Module):
@@ -130,22 +144,25 @@ class GoogLeNet(torch.nn.Module):
 
         weights = None
 
-        if pretrained:
-            weights = models.GoogLeNet_Weights.DEFAULT
+        
+        weights = models.GoogLeNet_Weights.DEFAULT if pretrained else None
         
         self.model = models.googlenet(weights=weights)
 
         # Freeze Layers
-        if not freeze:
+        if freeze:
             for param in self.model.parameters():
                 param.requires_grad = False
         
         self.model.fc = classifier
 
+    def forward(self, x):
+        x = self.model(x)
+        return x
 
 class EfficientNetB0(torch.nn.Module):
     def __init__(self, 
-                 classifier: torch.nn.Linear,
+                 classifier: Optional[torch.nn.Sequential] = None,
                  dropout = 0.5,
                  freeze = True, 
                  pretrained = False
@@ -160,14 +177,18 @@ class EfficientNetB0(torch.nn.Module):
 
         weights = None
 
-        if pretrained:
-            weights = models.EfficientNet_B0_Weights.DEFAULT
+        
+        weights = models.EfficientNet_B0_Weights.DEFAULT if pretrained else None
         
         self.model = models.efficientnet_b0(weights=weights)
 
         # Freeze Layers
-        if not freeze:
+        if freeze:
             for param in self.model.parameters():
                 param.requires_grad = False
         
-        self.model.fc = classifier
+        self.model.classifier = classifier
+
+    def forward(self, x):
+        x = self.model(x)
+        return x
