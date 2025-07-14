@@ -3,6 +3,7 @@
 A training framework for classification tasks.
 """
 
+import os
 
 from numpy import sum
 from torch import sigmoid, device
@@ -106,8 +107,9 @@ class ImageDataset(Dataset):
             raise ValueError("Kind must be one of the following: 'Validation', 'Train' (DEFAULT), 'Test' ")
         # End Parameter Processing
 
+        self.len = len(os.listdir('Fake')) + len(os.listdir('Real'))
         
-
+        # Produce a csv with n values
 
 
     def __len__(self):
